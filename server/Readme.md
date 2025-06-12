@@ -21,6 +21,14 @@ To make your server work it's required to follow a very specific server setup, w
 # {deploy path}: Your deploy path, like "/var/www/my-app"
 ```
 
+## Environment Variables
+
+Your repository environment variables should be placed at:
+* `.secrets/.env`: For production;
+* `.secrets/.env.hml`: For development.
+
+Theres `Env Files` will be copied to your project root directories.
+
 ## 🛠️ Configuration
 
 This deployer was make to be used with a `traefik` container running for automated sub-domain creation and ssl issuing.
