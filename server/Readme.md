@@ -7,12 +7,14 @@ To make your server work it's required to follow a very specific server setup, w
 
 {deploy-path}
 │
-├── .secrets
-│   ├── databases
-│   │   └── hml-{branch-name}-mysql-data
-│   └── storage
-└── {branch-name}
+└── {repo-name}
+    ├── .secrets
+    │   ├── databases
+    │   │   └── hml-{branch-name}-mysql-data
+    │   └── storage
+    └── {branch-name}
 
+# {repo-name}: Your repository name
 # {branch-name}: Your branch name (main, func/1 [turn to func-1], etc)
 # {deploy path}: Your deploy path, like "/var/www/my-app"
 ```
