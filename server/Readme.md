@@ -11,7 +11,9 @@ To make your server work it's required to follow a very specific server setup, w
     ├── .secrets
     │   ├── databases
     │   │   └── hml-{branch-name}-mysql-data
-    │   └── storage
+    │   ├── storage
+    │   ├── .env # Production env
+    │   └── .env.hml # Development env
     └── {branch-name}
 
 # {repo-name}: Your repository name
