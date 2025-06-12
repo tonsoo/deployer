@@ -1,0 +1,41 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: server-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: your-super-secure-password
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: your-second-super-secure-password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - web
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: server-pma
+    restart: always
+    environment:
+      PMA_HOST: mysql
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nareke-pma.rule=Host(`pma.{your-domain-name}`)
+      - traefik.http.routers.nareke-pma.entrypoints=websecure
+      - traefik.http.routers.nareke-pma.tls=true
+      - traefik.http.routers.nareke-pma.tls.certresolver=mytlschallenge
+      - traefik.http.services.nareke-pma.loadbalancer.server.port=80
+    depends_on:
+      - mysql
+    networks:
+      - web
+
+volumes:
+  mysql-data:
+    driver: local
+
+networks:
+  web:
+    name: web
+    external: true
