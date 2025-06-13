@@ -73,7 +73,7 @@ jobs:
         echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
         echo "APP_DEBUG=$APP_DEBUG" >> $GITHUB_ENV
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-        echo "APP_DOCKER_NAME=${{ inputs.app-name }}" >> $GITHUB_ENV
+        echo "APP_DOCKER_NAME=${{ inputs.app-name }}_$BRANCH_NAME" >> $GITHUB_ENV
         echo "DEPLOY_DIR=${{ secrets.DEPLOY_PATH }}/$BRANCH_NAME" >> $GITHUB_ENV
 
     - name: Setup node
