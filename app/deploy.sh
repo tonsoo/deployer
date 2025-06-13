@@ -2,6 +2,8 @@
 
 set -e
 
+echo "Running deploy for project $APP_DOCKER_NAME"
+
 echo "Installing dependencies"
 docker compose -p "$APP_DOCKER_NAME" exec -T php composer install --no-dev
 
