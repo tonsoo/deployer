@@ -18,24 +18,20 @@ on:
         required: false
         default: dev
         description: "The subdomain separator, must be separated by '.', such as 'dev' or 'dev.test' or 'dev.test.subdomain'"
-      db-password:
-        type: string
+    secrets:
+      DB_PASSWORD:
         required: true
         description: "Your database password for development environment"
-      ssh-host:
-        type: string
+      SSH_HOST:
         required: true
         description: "Your ssh host for server connection"
-      ssh-private-key:
-        type: string
+      SSH_PRIVATE_KEY:
         required: true
         description: "Your ssh private key for accessing server"
-      ssh-user:
-        type: string
+      SSH_USER:
         required: true
         description: "Your ssh username for server connection"
-      deploy-path:
-        type: string
+      DEPLOY_PATH:
         required: true
         description: "Your server absolute deploy path, without forwas slash, such as '/var/www/my-app'"
 
@@ -73,7 +69,7 @@ jobs:
         echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
         echo "APP_DEBUG=$APP_DEBUG" >> $GITHUB_ENV
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-        echo "DEPLOY_DIR=${{ inputs.deploy-path }}/$BRANCH_NAME" >> $GITHUB_ENV
+        echo "DEPLOY_DIR=${{ secrets.DEPLOY_PATH }}/$BRANCH_NAME" >> $GITHUB_ENV
 
     - name: Setup node
       uses: actions/setup-node@v4
@@ -89,11 +85,11 @@ jobs:
     - name: Setup ssh
       uses: webfactory/ssh-agent@v0.9.0
       with:
-        ssh-private-key: ${{ inputs.ssh-private-key }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Add ssh host
       run: |
-        ssh-keyscan -H ${{ inputs.ssh-host }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
     - name: Rsync files
       run: |
@@ -105,16 +101,16 @@ jobs:
           --exclude='.git' \
           --exclude='*.log' \
           --exclude='.DS_Store' \
-          ./ ${{ inputs.ssh-user }}@${{ inputs.ssh-host }}:${{ env.DEPLOY_DIR }}
+          ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.DEPLOY_DIR }}
 
     - name: Post-deploy hml
       if: env.APP_ENV == 'dev'
       run: |
-        ssh ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << EOF
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
         set -e
 
         cd "${{ env.DEPLOY_DIR }}"
-        cp "${{ inputs.deploy-path }}/.secrets/.env.hml" .env
+        cp "${{ secrets.DEPLOY_PATH }}/.secrets/.env.hml" .env
         cp docker-compose.hml.yml docker-compose.yml
 
         sed -i "s|{{BRANCH_NAME}}|${{ env.BRANCH_NAME }}|g" .env docker-compose.yml
@@ -125,8 +121,8 @@ jobs:
         sed -i "s|{{ASSET_URL}}|https://${{ env.DOMAIN }}|g" .env docker-compose.yml
         sed -i "s|{{APP_ENV}}|${{ env.APP_ENV }}|g" .env docker-compose.yml
         sed -i "s|{{APP_DEBUG}}|${{ env.APP_DEBUG }}|g" .env docker-compose.yml
-        sed -i "s|{{DB_PASSWORD}}|${{ inputs.db-password }}|g" .env docker-compose.yml
-        sed -i "s|{{DATABASE_PERSIST_PATH}}|${{ inputs.deploy-path }}/.secrets/databases/hml-${{ env.BRANCH_NAME }}-mysql-data|g" .env docker-compose.yml
+        sed -i "s|{{DB_PASSWORD}}|${{ secrets.DB_PASSWORD }}|g" .env docker-compose.yml
+        sed -i "s|{{DATABASE_PERSIST_PATH}}|${{ secrets.DEPLOY_PATH }}/.secrets/databases/hml-${{ env.BRANCH_NAME }}-mysql-data|g" .env docker-compose.yml
 
         mkdir -p bootstrap/cache storage/framework/{cache,sessions,views} storage/logs
         chmod -R 775 bootstrap/cache storage
@@ -141,11 +137,11 @@ jobs:
     - name: Post-deploy prod
       if: env.APP_ENV == 'production'
       run: |
-        ssh ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << EOF
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
         set -e
 
         cd "${{ env.DEPLOY_DIR }}"
-        cp "${{ inputs.deploy-path }}/.secrets/.env" .env
+        cp "${{ secrets.DEPLOY_PATH }}/.secrets/.env" .env
         cp docker-compose.prod.yml docker-compose.yml
 
         sed -i "s|{{BRANCH_NAME}}|${{ env.BRANCH_NAME }}|g" .env docker-compose.yml
@@ -154,10 +150,10 @@ jobs:
         sed -i "s|{{ASSET_URL}}|https://${{ env.DOMAIN }}|g" .env docker-compose.yml
         sed -i "s|{{APP_ENV}}|${{ env.APP_ENV }}|g" .env docker-compose.yml
         sed -i "s|{{APP_DEBUG}}|${{ env.APP_DEBUG }}|g" .env docker-compose.yml
-        sed -i "s|{{STORAGE_PATH}}|${{ inputs.deploy-path }}/.secrets/storage|g" .env docker-compose.yml
+        sed -i "s|{{STORAGE_PATH}}|${{ secrets.DEPLOY_PATH }}/.secrets/storage|g" .env docker-compose.yml
 
-        mkdir -p bootstrap/cache ${{ inputs.deploy-path }}/.secrets/storage/framework/{cache,sessions,views} ${{ inputs.deploy-path }}/.secrets/storage/logs
-        chmod -R 775 bootstrap/cache ${{ inputs.deploy-path }}/.secrets/storage
+        mkdir -p bootstrap/cache ${{ secrets.DEPLOY_PATH }}/.secrets/storage/framework/{cache,sessions,views} ${{ inputs.DEPLOY_PATH }}/.secrets/storage/logs
+        chmod -R 775 bootstrap/cache ${{ secrets.DEPLOY_PATH }}/.secrets/storage
 
         echo "Restarting containers without orphans"
         docker compose down --remove-orphans
