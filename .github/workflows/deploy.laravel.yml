@@ -51,7 +51,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        repository: ${{ repo }}
+        repository: ${{ inputs.repo }}
 
     - name: Set deployment env variables
       id: set-env-vars
