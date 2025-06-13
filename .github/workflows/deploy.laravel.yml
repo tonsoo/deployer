@@ -119,7 +119,7 @@ jobs:
 
         cd "${{ env.DEPLOY_DIR }}"
         cp "${{ secrets.DEPLOY_PATH }}/.secrets/.env.hml" .env
-        cp docker-compose.hml.yml docker-compose.yml
+        cp docker-compose.dev.yml docker-compose.yml
 
         sed -i "s|{{BRANCH_NAME}}|${{ env.BRANCH_NAME }}|g" .env docker-compose.yml
         sed -i "s|{{DOMAIN}}|${{ env.DOMAIN }}|g" .env docker-compose.yml
