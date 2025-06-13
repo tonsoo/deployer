@@ -1,7 +1,7 @@
 services:
   php:
     build: ./docker
-    container_name: "my-app-php-{{BRANCH_NAME}}"
+    container_name: "{{APP_NAME}}-php-{{BRANCH_NAME}}"
     environment:
       SERVER_NAME: ":80"
     volumes:
@@ -10,18 +10,18 @@ services:
       - localmysql
     labels:
       - traefik.enable=true
-      - traefik.http.routers.my-app-hml-{{BRANCH_NAME}}.rule=Host(`{{DOMAIN}}`)
-      - traefik.http.routers.my-app-hml-{{BRANCH_NAME}}.entrypoints=websecure
-      - traefik.http.routers.my-app-hml-{{BRANCH_NAME}}.tls=true
-      - traefik.http.routers.my-app-hml-{{BRANCH_NAME}}.tls.certresolver=mytlschallenge
-      - traefik.http.services.my-app-hml-{{BRANCH_NAME}}.loadbalancer.server.port=80
+      - traefik.http.routers.{{APP_NAME}}-hml-{{BRANCH_NAME}}.rule=Host(`{{DOMAIN}}`)
+      - traefik.http.routers.{{APP_NAME}}-hml-{{BRANCH_NAME}}.entrypoints=websecure
+      - traefik.http.routers.{{APP_NAME}}-hml-{{BRANCH_NAME}}.tls=true
+      - traefik.http.routers.{{APP_NAME}}-hml-{{BRANCH_NAME}}.tls.certresolver=mytlschallenge
+      - traefik.http.services.{{APP_NAME}}-hml-{{BRANCH_NAME}}.loadbalancer.server.port=80
     networks:
       - web
       - sql
 
   localmysql:
     image: mysql:8.4
-    container_name: "my-app-mysql-{{BRANCH_NAME}}"
+    container_name: "{{APP_NAME}}-mysql-{{BRANCH_NAME}}"
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: "{{DB_PASSWORD}}"
@@ -35,7 +35,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: "my-app-pma-{{BRANCH_NAME}}"
+    container_name: "{{APP_NAME}}-pma-{{BRANCH_NAME}}"
     restart: always
     environment:
       PMA_HOST: localmysql
@@ -43,11 +43,11 @@ services:
       - localmysql
     labels:
       - traefik.enable=true
-      - traefik.http.routers.my-app-hml-pma-{{BRANCH_NAME}}.rule=Host(`{{PMA_DOMAIN}}`)
-      - traefik.http.routers.my-app-hml-pma-{{BRANCH_NAME}}.entrypoints=websecure
-      - traefik.http.routers.my-app-hml-pma-{{BRANCH_NAME}}.tls=true
-      - traefik.http.routers.my-app-hml-pma-{{BRANCH_NAME}}.tls.certresolver=mytlschallenge
-      - traefik.http.services.my-app-hml-pma-{{BRANCH_NAME}}.loadbalancer.server.port=80
+      - traefik.http.routers.{{APP_NAME}}-hml-pma-{{BRANCH_NAME}}.rule=Host(`{{PMA_DOMAIN}}`)
+      - traefik.http.routers.{{APP_NAME}}-hml-pma-{{BRANCH_NAME}}.entrypoints=websecure
+      - traefik.http.routers.{{APP_NAME}}-hml-pma-{{BRANCH_NAME}}.tls=true
+      - traefik.http.routers.{{APP_NAME}}-hml-pma-{{BRANCH_NAME}}.tls.certresolver=mytlschallenge
+      - traefik.http.services.{{APP_NAME}}-hml-pma-{{BRANCH_NAME}}.loadbalancer.server.port=80
     networks:
       - web
       - sql
@@ -58,5 +58,5 @@ networks:
     external: true
 
   sql:
-    name: my-app-hml-db-{{BRANCH_NAME}}
+    name: "{{APP_NAME}}-hml-db-{{BRANCH_NAME}}"
     internal: true
