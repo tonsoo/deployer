@@ -4,6 +4,10 @@ set -e
 
 echo "Running deploy for project $1"
 
+echo "Restarting containers without orphans"
+docker compose -p "$1" down
+docker compose -p "$1" up -d
+
 echo "Installing dependencies"
 docker compose -p "$1" exec -T php composer install --no-dev
 

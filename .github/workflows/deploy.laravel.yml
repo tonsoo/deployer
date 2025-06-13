@@ -73,7 +73,7 @@ jobs:
         echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
         echo "APP_DEBUG=$APP_DEBUG" >> $GITHUB_ENV
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-        echo "APP_DOCKER_NAME=${{ inputs.app-name }}_$BRANCH_NAME" >> $GITHUB_ENV
+        echo "APP_DOCKER_NAME=${{ inputs.app-name }}-$BRANCH_NAME" >> $GITHUB_ENV
         echo "DEPLOY_DIR=${{ secrets.DEPLOY_PATH }}/$BRANCH_NAME" >> $GITHUB_ENV
 
     - name: Setup node
@@ -95,6 +95,9 @@ jobs:
     - name: Add ssh host
       run: |
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Downlod deployer.sh
+      run: curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh
 
     - name: Rsync files
       run: |
@@ -133,11 +136,7 @@ jobs:
         mkdir -p bootstrap/cache storage/framework/{cache,sessions,views} storage/logs
         chmod -R 775 bootstrap/cache storage
 
-        echo "Restarting containers without orphans"
-        docker compose -p "${{ env.APP_DOCKER_NAME }}" down
-        docker compose -p "${{ env.APP_DOCKER_NAME }}" up -d
-
-        curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh | bash -s -- "${{ env.APP_DOCKER_NAME }}"
+        curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh | bash -s -- "$APP_DOCKER_NAME"
         EOF
         
     - name: Post-deploy prod
@@ -157,14 +156,10 @@ jobs:
         sed -i "s|{{APP_ENV}}|${{ env.APP_ENV }}|g" .env docker-compose.yml
         sed -i "s|{{APP_DEBUG}}|${{ env.APP_DEBUG }}|g" .env docker-compose.yml
         sed -i "s|{{STORAGE_PATH}}|${{ secrets.DEPLOY_PATH }}/.secrets/storage|g" .env docker-compose.yml
-        sed -i "s|{{APP_DOCKER_NAME}}|${{ inputs.APP_DOCKER_NAME }}|g" docker-compose.yml
+        sed -i "s|{{APP_DOCKER_NAME}}|${{ env.APP_DOCKER_NAME }}|g" docker-compose.yml
 
         mkdir -p bootstrap/cache ${{ secrets.DEPLOY_PATH }}/.secrets/storage/framework/{cache,sessions,views} ${{ inputs.DEPLOY_PATH }}/.secrets/storage/logs
         chmod -R 775 bootstrap/cache ${{ secrets.DEPLOY_PATH }}/.secrets/storage
-
-        echo "Restarting containers without orphans"
-        docker compose -p "${{ env.APP_DOCKER_NAME }}" down
-        docker compose -p "${{ env.APP_DOCKER_NAME }}" up -d
 
         curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh | bash -s -- "${{ env.APP_DOCKER_NAME }}"
         EOF
