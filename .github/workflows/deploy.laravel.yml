@@ -133,6 +133,8 @@ jobs:
         mkdir -p bootstrap/cache storage/framework/{cache,sessions,views} storage/logs
         chmod -R 775 bootstrap/cache storage
 
+        curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh | bash
+
         echo "Restarting containers without orphans"
         docker compose -p "${{ env.APP_DOCKER_NAME }}" down
         docker compose -p "${{ env.APP_DOCKER_NAME }}" up -d
@@ -161,6 +163,8 @@ jobs:
 
         mkdir -p bootstrap/cache ${{ secrets.DEPLOY_PATH }}/.secrets/storage/framework/{cache,sessions,views} ${{ inputs.DEPLOY_PATH }}/.secrets/storage/logs
         chmod -R 775 bootstrap/cache ${{ secrets.DEPLOY_PATH }}/.secrets/storage
+
+        curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh | bash
 
         echo "Restarting containers without orphans"
         docker compose -p "${{ env.APP_DOCKER_NAME }}" down

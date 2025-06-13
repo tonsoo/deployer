@@ -8,8 +8,6 @@ Configuring your app is fairly simple, you only need to copy the three docker co
 * [`Dev docker-compose.yml`](docker-compose.dev.yml): For server dev mode development, so in another branch using another subdomain for testing;
 * [`Prod docker-compose.yml`](docker-compose.prod.yml): For your production app, on your main domain.
 
-And you also need to copy the [`Deploy File`](deploy.sh) to yout app root directory.
-
 **It's recommended to change these values in each docker-compose file:**
 * `my-app`: Should be replaced by your actual app name, such as `my-app-name`, `project-app`, `large-secrect-project`, etc;
 * `myappdatabase`: Your app database name;
