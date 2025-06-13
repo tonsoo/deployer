@@ -137,7 +137,7 @@ jobs:
         docker compose -p "${{ env.APP_DOCKER_NAME }}" down
         docker compose -p "${{ env.APP_DOCKER_NAME }}" up -d
 
-        curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh | bash
+        curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh | bash -s -- "${{ env.APP_DOCKER_NAME }}"
         EOF
         
     - name: Post-deploy prod
@@ -166,7 +166,7 @@ jobs:
         docker compose -p "${{ env.APP_DOCKER_NAME }}" down
         docker compose -p "${{ env.APP_DOCKER_NAME }}" up -d
 
-        curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh | bash
+        curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh | bash -s -- "${{ env.APP_DOCKER_NAME }}"
         EOF
 
     - name: Set deployment URL on GitHub
