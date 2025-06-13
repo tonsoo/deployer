@@ -128,8 +128,8 @@ jobs:
         chmod -R 775 bootstrap/cache storage
 
         echo "Restarting containers without orphans"
-        docker compose down --remove-orphans
-        docker compose up -d --remove-orphans
+        docker compose down
+        docker compose up -d
 
         source deploy.sh seed
         EOF
@@ -156,8 +156,8 @@ jobs:
         chmod -R 775 bootstrap/cache ${{ secrets.DEPLOY_PATH }}/.secrets/storage
 
         echo "Restarting containers without orphans"
-        docker compose down --remove-orphans
-        docker compose up -d --remove-orphans
+        docker compose down
+        docker compose up -d
 
         source deploy.sh
         EOF
