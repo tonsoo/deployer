@@ -1,21 +1,17 @@
 name: Cleanup
 on:
   workflow_call:
-    inputs:
-      ssh-host:
-        type: string
+    secrets:
+      SSH_HOST:
         required: true
         description: "Your ssh host for server connection"
-      ssh-private-key:
-        type: string
+      SSH_PRIVATE_KEY:
         required: true
         description: "Your ssh private key for accessing server"
-      ssh-user:
-        type: string
+      SSH_USER:
         required: true
         description: "Your ssh username for server connection"
-      deploy-path:
-        type: string
+      DEPLOY_PATH:
         required: true
         description: "Your server absolute deploy path, without forwas slash, such as '/var/www/my-app'"
 
@@ -33,20 +29,20 @@ jobs:
           BRANCH_NAME=$(echo "${{ github.event.ref }}" | tr '/' '-')
 
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-          echo "DEPLOY_DIR=${{ inputs.deploy-path }}/$BRANCH_NAME" >> $GITHUB_ENV
+          echo "DEPLOY_DIR=${{ secrets.DEPLOY_PATH }}/$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Setup ssh
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ inputs.ssh-private-key }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add ssh host
         run: |
-          ssh-keyscan -H ${{ inputs.ssh-host }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Delete deployment folder on server
         run: |
-          ssh ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} << EOF
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
 
           echo "Deleting deployment for branch: ${{ env.BRANCH_NAME }}"
           DEPLOY_DIR="${{ env.DEPLOY_DIR }}"

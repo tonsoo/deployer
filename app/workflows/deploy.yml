@@ -18,5 +18,5 @@ jobs:
       ssh-host: ${{ secrets.SSH_HOST }}
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       ssh-user: ${{ secrets.SSH_USER }}
-      deploy-path: /var/www/projects
+      deploy-path: ${{ secrets.DEPLOY_PATH }}
       add-to-deploys: true # Will create an entry in your deploys lists
