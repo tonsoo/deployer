@@ -23,9 +23,6 @@ on:
         required: true
         description: "Your app project name that'll be used as the project name for the docker compose containers"
     secrets:
-      DB_PASSWORD:
-        required: true
-        description: "Your database password for development environment"
       SSH_HOST:
         required: true
         description: "Your ssh host for server connection"
