@@ -4,19 +4,25 @@ on:
   push:
     branches:
       - main
-      - dev
-      - ...
+      - "**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
 
 jobs:
   call-deploy:
-    uses: tonsoo/deployer/.github/workflows/deploy.laravel.yml@main
+    uses: tonsoo/deployer/.github/workflows/deploy.<your-app-type>.yml@main
+    secrets:
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
     with:
       repo: your-username/your-repo
+      app-name: your-app-name
       domain: example.com
       sub-domain: dev # Your dev branches will be accessible at branch.dev.example.com
-      db-password: ${{ secrets.DB_PASSWORD }}
-      ssh-host: ${{ secrets.SSH_HOST }}
-      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      ssh-user: ${{ secrets.SSH_USER }}
-      deploy-path: ${{ secrets.DEPLOY_PATH }}
       add-to-deploys: true # Will create an entry in your deploys lists
