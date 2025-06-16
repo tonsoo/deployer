@@ -78,7 +78,7 @@ jobs:
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
     - name: Downlod deployer.sh
-      run: curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/react/deploy.sh
+      run: curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/react/deploy.sh -o deploy.sh
 
     - name: Rsync files
       run: |
