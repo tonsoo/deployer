@@ -1,0 +1,20 @@
+services:
+  php:
+    build: ./docker
+    container_name: "{{APP_NAME}}-php-{{BRANCH_NAME}}"
+    environment:
+      SERVER_NAME: ":80"
+    volumes:
+      - .:/app
+      - "{{STORAGE_PATH}}:/app/storage"
+    labels:
+      caddy: "{{DOMAIN}}"
+      caddy.reverse_proxy: "{{upstreams 80}}"
+    env_file: .env
+    networks:
+      - web
+
+networks:
+  web:
+    name: web
+    external: true

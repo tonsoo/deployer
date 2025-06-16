@@ -62,31 +62,14 @@ jobs:
 
         if [ "$BRANCH_NAME" = "main" ]; then
           DOMAIN="$BASE_DOMAIN"
-          APP_ENV="production"
-          APP_DEBUG=false
         else
           DOMAIN="${BRANCH_NAME}$( [ -n "$SUB_DOMAIN" ] && echo ".$SUB_DOMAIN" ).${BASE_DOMAIN}"
-          APP_ENV="dev"
-          APP_DEBUG=true
         fi
 
         echo "DOMAIN=$DOMAIN" >> $GITHUB_ENV
-        echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
-        echo "APP_DEBUG=$APP_DEBUG" >> $GITHUB_ENV
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
         echo "APP_DOCKER_NAME=${{ inputs.app-name }}-$BRANCH_NAME" >> $GITHUB_ENV
         echo "DEPLOY_DIR=${{ secrets.DEPLOY_PATH }}/$BRANCH_NAME" >> $GITHUB_ENV
-
-    - name: Setup node
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-
-    - name: Install node dependencies
-      run: |
-        npm install
-        npm run build
 
     - name: Setup ssh
       uses: webfactory/ssh-agent@v0.9.0
@@ -98,22 +81,14 @@ jobs:
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
     - name: Downlod deployer.sh
-      run: curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/laravel/deploy.sh
+      run: curl -fsSL https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/react/deploy.sh
 
     - name: Rsync files
       run: |
         rsync -avz --delete \
-          --exclude='storage' \
-          --exclude='.env' \
-          --exclude='vendor' \
-          --exclude='node_modules' \
-          --exclude='.git' \
-          --exclude='*.log' \
-          --exclude='.DS_Store' \
           ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.DEPLOY_DIR }}
 
-    - name: Post-deploy hml
-      if: env.APP_ENV == 'dev'
+    - name: Post-deploy
       run: |
         ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
         set -e
@@ -124,47 +99,7 @@ jobs:
 
         sed -i "s|{{BRANCH_NAME}}|${{ env.BRANCH_NAME }}|g" .env docker-compose.yml
         sed -i "s|{{DOMAIN}}|${{ env.DOMAIN }}|g" .env docker-compose.yml
-        sed -i "s|{{PMA_DOMAIN}}|pma.${{ env.DOMAIN }}|g" .env docker-compose.yml
-        sed -i "s|{{SESSION_COOKIE}}|hml_pinheiro_psicologia_${{ env.BRANCH_NAME }}_session|g" .env docker-compose.yml
-        sed -i "s|{{APP_URL}}|https://${{ env.DOMAIN }}|g" .env docker-compose.yml
-        sed -i "s|{{ASSET_URL}}|https://${{ env.DOMAIN }}|g" .env docker-compose.yml
-        sed -i "s|{{APP_ENV}}|${{ env.APP_ENV }}|g" .env docker-compose.yml
-        sed -i "s|{{APP_DEBUG}}|${{ env.APP_DEBUG }}|g" .env docker-compose.yml
-        sed -i "s|{{DB_PASSWORD}}|${{ secrets.DB_PASSWORD }}|g" .env docker-compose.yml
-        sed -i "s|{{APP_DOCKER_NAME}}|${{ env.APP_DOCKER_NAME }}|g" docker-compose.yml
-        sed -i "s|{{DATABASE_PERSIST_PATH}}|${{ secrets.DEPLOY_PATH }}/.secrets/databases/hml-${{ env.BRANCH_NAME }}-mysql-data|g" .env docker-compose.yml
 
-        mkdir -p bootstrap/cache storage/framework/{cache,sessions,views} storage/logs
-        chmod -R 775 bootstrap/cache storage
-
-        curl -fsSL -o deploy.sh https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh
-        source deploy.sh "${{ env.APP_DOCKER_NAME }}"
-        rm deploy.sh
-        EOF
-        
-    - name: Post-deploy prod
-      if: env.APP_ENV == 'production'
-      run: |
-        ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
-        set -e
-
-        cd "${{ env.DEPLOY_DIR }}"
-        cp "${{ secrets.DEPLOY_PATH }}/.secrets/.env" .env
-        cp docker-compose.prod.yml docker-compose.yml
-
-        sed -i "s|{{BRANCH_NAME}}|${{ env.BRANCH_NAME }}|g" .env docker-compose.yml
-        sed -i "s|{{DOMAIN}}|${{ env.DOMAIN }}|g" .env docker-compose.yml
-        sed -i "s|{{APP_URL}}|https://${{ env.DOMAIN }}|g" .env docker-compose.yml
-        sed -i "s|{{ASSET_URL}}|https://${{ env.DOMAIN }}|g" .env docker-compose.yml
-        sed -i "s|{{APP_ENV}}|${{ env.APP_ENV }}|g" .env docker-compose.yml
-        sed -i "s|{{APP_DEBUG}}|${{ env.APP_DEBUG }}|g" .env docker-compose.yml
-        sed -i "s|{{STORAGE_PATH}}|${{ secrets.DEPLOY_PATH }}/.secrets/storage|g" .env docker-compose.yml
-        sed -i "s|{{APP_DOCKER_NAME}}|${{ env.APP_DOCKER_NAME }}|g" docker-compose.yml
-
-        mkdir -p bootstrap/cache ${{ secrets.DEPLOY_PATH }}/.secrets/storage/framework/{cache,sessions,views} ${{ inputs.DEPLOY_PATH }}/.secrets/storage/logs
-        chmod -R 775 bootstrap/cache ${{ secrets.DEPLOY_PATH }}/.secrets/storage
-
-        curl -fsSL -o deploy.sh https://raw.githubusercontent.com/tonsoo/deployer/refs/heads/main/app/deploy.sh
         source deploy.sh "${{ env.APP_DOCKER_NAME }}"
         rm deploy.sh
         EOF

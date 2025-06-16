@@ -1,0 +1,25 @@
+services:
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:latest
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CADDY_INGRESS_NETWORKS: web
+      ACME_AGREE: true
+      CADDY_DOCKER_CADDYFILE_PATH: /etc/caddy/Caddyfile
+      CADDY_EMAIL: ${SSL_EMAIL}
+    volumes: 
+      - caddy_data:/data
+      - /run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+
+volumes:
+  caddy_data:
+
+networks:
+  web:
+    external: true

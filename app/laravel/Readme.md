@@ -15,7 +15,7 @@ Configuring your app is fairly simple, you only need to copy the three docker co
 * `my-app-secure-password`: Your local database password;
 * `my-app-super-secure-password`: Your local root database password.
 
-After configuring all that it's essential to have your php image, there are you Dockerfiles at [`dockerfiles`](dockerfiles), one using the official PHP's FastCGI image and the second using Fran, but you can use whatever you want to run this!
+After configuring all that, it's essential to have your php image. There are two Dockerfiles at [`dockerfiles`](dockerfiles), one using the official PHP's FastCGI image and the second using Fran, but you can use whatever you want to run this!
 
 ### 2. Deployment script
 
@@ -23,4 +23,4 @@ After setting up your app with your docker-compose information you need a workfl
 1. `.github/workflows/deploy.yml`: For general deployments;
 1. `.github/workflows/cleanup.yml`: For cleaning deleted branches.
 
-The workflow files can be seen at [`workflows`](workflows)
+The workflow files can be seen at [`workflows`](../workflows)
